@@ -16,3 +16,7 @@ export function generateToken({ userId, role }) {
 export const verifyRefreshToken = (token) => {
   return jwt.verify(token, config.REFRESH_TOKEN_SECRET);
 };
+
+export const verifyAccessToken = (token) => {
+  return jwt.verify(token, config.ACCESS_TOKEN_SECRET);
+};
