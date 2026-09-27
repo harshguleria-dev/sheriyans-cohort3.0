@@ -1,4 +1,6 @@
 import userModel from "../models/user.model.js";
+import bcrypt from "bcryptjs";
+import { generateToken } from "../utils/auth.utils.js";
 
 export async function register(req, res) {
   const { email, name, password } = req.body;
@@ -11,7 +13,7 @@ export async function register(req, res) {
       errors: [
         {
           field: "email",
-          message: "User already exists with this email adddress",
+          message: "User already exists with this email address",
         },
       ],
     });
@@ -22,19 +24,21 @@ export async function register(req, res) {
   const user = await userModel.create({
     name,
     email,
-    password: encryptedPassword,
+    passwordHash: encryptedPassword,
   });
 
-  const { accessToken, refreshToken } = await generateToken({
+  const { accessToken, refreshToken } = generateToken({
     userId: user._id,
-    role: user.role
+    role: user.role,
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: true,
     maxAge: 1000 * 60 * 60 * 24 * 7,
   });
+
+  user.refreshToken = refreshToken;
+  await user.save();
 
   return res.status(201).json({
     message: "User registered successfully",
@@ -44,7 +48,7 @@ export async function register(req, res) {
         name: user.name,
         email: user.email,
       },
+      accessToken,
     },
-    accessToken,
   });
 }
