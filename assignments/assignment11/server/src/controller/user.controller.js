@@ -27,16 +27,24 @@ export async function register(req, res) {
 
   const { accessToken, refreshToken } = await generateToken({
     userId: user._id,
+    role: user.role
   });
 
-  res.
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  });
 
   return res.status(201).json({
     message: "User registered successfully",
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
+    data: {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     },
+    accessToken,
   });
 }
