@@ -16,4 +16,27 @@ export async function register(req, res) {
       ],
     });
   }
+
+  const encryptedPassword = await bcrypt.hash(password, 12);
+
+  const user = await userModel.create({
+    name,
+    email,
+    password: encryptedPassword,
+  });
+
+  const { accessToken, refreshToken } = await generateToken({
+    userId: user._id,
+  });
+
+  res.
+
+  return res.status(201).json({
+    message: "User registered successfully",
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+  });
 }
