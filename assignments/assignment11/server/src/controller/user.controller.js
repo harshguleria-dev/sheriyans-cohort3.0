@@ -1,6 +1,6 @@
 import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import { generateToken } from "../utils/auth.utils.js";
+import { generateToken, verifyRefreshToken } from "../utils/auth.utils.js";
 
 export async function register(req, res) {
   const { email, name, password } = req.body;
@@ -106,4 +106,63 @@ export async function login(req, res) {
       accessToken,
     },
   });
+}
+
+export async function refreshToken(req, res) {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) {
+    return res.status(401).json({
+      message: "Refresh token not found",
+    });
+  }
+
+  try {
+    const decoded = verifyRefreshToken(refreshToken);
+
+    const user = await userModel.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid refresh token",
+      });
+    }
+
+    if (user.refreshToken !== refreshToken) {
+      await userModel.findByIdAndUpdate(user._id, { refreshToken: null });
+      return res.status(401).json({
+        message: "Invalid refresh token",
+      });
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } = generateToken({
+      userId: user._id,
+      role: user.role,
+    });
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    });
+
+    await userModel.findByIdAndUpdate(user._id, {
+      refreshToken: newRefreshToken,
+    });
+
+    return res.status(200).json({
+      message: "Token rotated successfully",
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+        accessToken,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to refresh token",
+    });
+  }
 }
