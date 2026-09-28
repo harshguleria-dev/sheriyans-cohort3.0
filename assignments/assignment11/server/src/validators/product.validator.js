@@ -19,19 +19,51 @@ export const createProductValidator = [
     }
     return true;
   }),
-  body("price.amount").exists().withMessage("Amount is required").isFloat({min: 0}).withMessage("Amount must be a non-negative number"),
-body("price.currency").exists().withMessage("Currency is required").isString().withMessage("Currency must be a string").isIn(["USD","INR"]).withMessage("Currency must be either USD or INR")
-  body("sizes").custom((sizes) => {
-    if (sizes.length < 1) {
-      throw new Error("Please provide at least one size");
-    }
-    return true;
-  }),
+  body("price.amount")
+    .exists()
+    .withMessage("Amount is required")
+    .isFloat({ min: 0 })
+    .withMessage("Amount must be a non-negative number"),
+  body("price.currency")
+    .exists()
+    .withMessage("Currency is required")
+    .isString()
+    .withMessage("Currency must be a string")
+    .isIn(["USD", "INR"])
+    .withMessage("Currency must be either USD or INR"),
+  body("sizes")
+    .exists()
+    .withMessage("Sizes is required")
+    .bail()
+    .toArray()
+    .withMessage("Sizes must be an array")
+    .bail()
+    .custom((sizes) => {
+      if (sizes.length < 1) {
+        throw new Error("Please provide at least one size");
+      }
+      return true;
+    }),
+  body("sizes.*.size")
+    .exists()
+    .withMessage("Size is required")
+    .bail()
+    .isIn(["XS", "S", "M", "L", "XL", "XXL"])
+    .withMessage("Invalid size"),
+  body("sizes.*.stock")
+    .exists()
+    .withMessage("Stock is required")
+    .bail()
+    .isInt({ min: 0 })
+    .withMessage("Stock must be a non-negative number"),
 
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        message: "Invalid Input",
+        errors: errors.array(),
+      });
     }
     next();
   },
