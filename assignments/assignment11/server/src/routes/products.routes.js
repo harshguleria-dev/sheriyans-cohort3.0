@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middleware/auth.middleware.js";
 import { createProduct } from "../controller/product.controller.js";
+import { createProductValidator } from "../validators/product.validator.js";
 
 import multer from "multer";
 
@@ -43,6 +44,7 @@ router.post(
     req.body.sizes = sizes;
     next();
   },
+  createProductValidator,
   createProduct,
 );
 
