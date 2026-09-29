@@ -4,7 +4,22 @@ import { createProduct } from "../controller/product.controller.js";
 
 import multer from "multer";
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 1024 * 1024 * 1, // 1 MB
+    files: 5,
+  },
+  fileFilter: (cb, file) => {
+    const fileTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+    if (fileTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type"));
+    }
+  },
+});
 
 const router = Router();
 
@@ -20,6 +35,14 @@ router.post(
     next();
   },
   upload.array("images", 5),
+  (req, res, next) => {
+    const price = JSON.parse(req.body.price);
+    const sizes = JSON.parse(req.body.sizes);
+
+    req.body.price = price;
+    req.body.sizes = sizes;
+    next();
+  },
   createProduct,
 );
 
