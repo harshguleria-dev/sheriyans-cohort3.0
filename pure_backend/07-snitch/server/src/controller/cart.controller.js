@@ -12,6 +12,8 @@ export async function addToCart(req, res) {
     });
   }
 
+  console.log(product);
+
   const selectedSize = product.sizes.find((s) => s.size === size);
 
   if (!selectedSize) {
@@ -24,5 +26,27 @@ export async function addToCart(req, res) {
     return res.status(400).json({
       message: "Insufficient stock",
     });
+  }
+
+  console.log("selectedSize", selectedSize);
+
+  const cart =
+    (await cartModel.findOne({ user: req.user.userId })) ??
+    (await cartModel.create({ user: req.user.userId }));
+
+  console.log(req.user);
+
+  console.log("Cart", cart);
+
+  const productInCart = cart.products.find(
+    (p) => p.product.toString() === productId && p.size === size,
+  );
+
+  if (productInCart) {
+    if (productInCart.quantity + quantity > selectedSize) {
+      return res.status(400).json({
+        message: "Insufficient stock",
+      });
+    }
   }
 }
