@@ -13,6 +13,7 @@ import {
   listAllProducts,
   unlistProduct,
   listProduct,
+  listAllProductsToSeller,
 } from "../controller/product.controller.js";
 import multer from "multer";
 
@@ -44,6 +45,14 @@ router.post(
 
 // * @GET /api/products
 router.get("/", authenticate, listAllProducts);
+
+// * @GET /api/products/seller
+router.get(
+  "/seller",
+  authenticate,
+  authenticateSeller,
+  listAllProductsToSeller,
+);
 
 // * GET /api/products/unlist/:id
 router.post(

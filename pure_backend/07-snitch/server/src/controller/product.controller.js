@@ -35,7 +35,20 @@ export async function createProduct(req, res) {
 }
 
 export async function listAllProducts(req, res) {
-  const products = await productModel.find();
+  const products = await productModel.find({
+    published: true,
+  });
+
+  res.status(200).json({
+    message: "Products data fetched successfully",
+    data: {
+      products,
+    },
+  });
+}
+
+export async function listAllProductsToSeller(req, res) {
+  const products = await productModel.find({});
 
   res.status(200).json({
     message: "Products data fetched successfully",
