@@ -1,6 +1,9 @@
 import { Router } from "express";
 import createProductValidator from "../validators/product.validator.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
+import {
+  authenticate,
+  authenticateSeller,
+} from "../middlewares/auth.middleware.js";
 import {
   createProduct,
   listAllProducts,
@@ -21,15 +24,7 @@ const router = Router();
 router.post(
   "/",
   authenticate,
-  async (req, res, next) => {
-    if (req.user.role !== "seller") {
-      return res.status(403).json({
-        message: "User is not authorize to create products",
-      });
-    }
-
-    next();
-  },
+  authenticateSeller,
   upload.array("images"),
   (req, res, next) => {
     req.body?.price && (req.body.price = JSON.parse(req.body.price));
@@ -45,13 +40,6 @@ router.post(
 router.get("/", authenticate, listAllProducts);
 
 // * GET /api/products/unlist/:id
-router.post("/unlist:id", authenticate, (req, res, next) => {
-  if (req.user.role !== "seller") {
-    return res.status(403).json({
-      message: "Forbidden access, only a seller can unlist ",
-    });
-  }
-  next();
-});
+router.post("/unlist:id", authenticate, authenticateSeller);
 
 export default router;
