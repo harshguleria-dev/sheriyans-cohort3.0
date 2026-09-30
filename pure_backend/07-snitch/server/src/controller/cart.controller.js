@@ -12,8 +12,6 @@ export async function addToCart(req, res) {
     });
   }
 
-  console.log(product);
-
   const selectedSize = product.sizes.find((s) => s.size === size);
 
   if (!selectedSize) {
@@ -28,15 +26,9 @@ export async function addToCart(req, res) {
     });
   }
 
-  console.log("selectedSize", selectedSize);
-
   const cart =
     (await cartModel.findOne({ user: req.user.userId })) ??
     (await cartModel.create({ user: req.user.userId }));
-
-  console.log(req.user);
-
-  console.log("Cart", cart);
 
   const productInCart = cart.products.find(
     (p) => p.product.toString() === productId && p.size === size,
@@ -78,5 +70,18 @@ export async function addToCart(req, res) {
 
   return res.status(200).json({
     message: "Product added to cart",
+  });
+}
+
+export async function getCart(req, res) {
+  const cart =
+    (await cartModel.findOne({ user: re.user.userId })) ??
+    (await cartModel.create({ user: req.user.userId }));
+
+  return res.status(200).json({
+    message: "Cart reveived successfully",
+    data: {
+      cart: cart,
+    },
   });
 }

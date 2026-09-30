@@ -7,4 +7,6 @@ const router = Router();
 
 router.post("/", authenticate, addToCartValidator, addToCart);
 
+router.get("/", authenticate,)
+
 export default router;
