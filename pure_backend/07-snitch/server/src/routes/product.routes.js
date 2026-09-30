@@ -1,5 +1,5 @@
 import { Router } from "express";
-import createProductValidator from "../validators/product.validator.js";
+import { createProductValidator, unlistProductValidator } from "../validators/product.validator.js";
 import {
   authenticate,
   authenticateSeller,
@@ -7,6 +7,7 @@ import {
 import {
   createProduct,
   listAllProducts,
+  unlistProduct,
 } from "../controller/product.controller.js";
 import multer from "multer";
 
@@ -40,6 +41,6 @@ router.post(
 router.get("/", authenticate, listAllProducts);
 
 // * GET /api/products/unlist/:id
-router.post("/unlist:id", authenticate, authenticateSeller);
+router.post("/unlist:id", authenticate, authenticateSeller, unlistProductValidator, unlistProduct);
 
 export default router;
