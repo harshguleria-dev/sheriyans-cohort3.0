@@ -44,4 +44,14 @@ router.post(
 // * @GET /api/products
 router.get("/", authenticate, listAllProducts);
 
+// * GET /api/products/unlist/:id
+router.post("/unlist:id", authenticate, (req, res, next) => {
+  if (req.user.role !== "seller") {
+    return res.status(403).json({
+      message: "Forbidden access, only a seller can unlist ",
+    });
+  }
+  next();
+});
+
 export default router;
